@@ -16,7 +16,6 @@ func main() {
 	config.ReadConfigFromJson("config.json", producer.Config)
 
 	err := producer.Build()
-
 	if err != nil {
 		panic(err)
 	}
@@ -28,7 +27,6 @@ func main() {
 		word := "Message published at " + time.Now().Local().String()
 
 		err = producer.Write(word)
-
 		if err != nil {
 			panic(err)
 		}

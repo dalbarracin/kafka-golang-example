@@ -14,7 +14,6 @@ func main() {
 	config.ReadConfigFromJson("config.json", consumer.Config)
 
 	err := consumer.Build()
-
 	if err != nil {
 		panic(err)
 	}
@@ -23,7 +22,6 @@ func main() {
 
 	for {
 		err = consumer.Read()
-
 		if err != nil {
 			panic(err)
 		}

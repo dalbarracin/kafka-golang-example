@@ -24,7 +24,6 @@ func (p *KafkaProducer) Write(word string) error {
 	events := <-p.producer.Events()
 
 	message := events.(*kafka.Message)
-
 	if message.TopicPartition.Error != nil {
 		return fmt.Errorf("delivery failed: %v", message.TopicPartition)
 	}
@@ -37,7 +36,6 @@ func (p *KafkaProducer) Write(word string) error {
 func (p *KafkaProducer) Build() error {
 
 	np, err := kafka.NewProducer(p.producerConfigMap())
-
 	if err != nil {
 		return err
 	}

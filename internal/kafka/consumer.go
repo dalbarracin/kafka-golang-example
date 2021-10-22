@@ -16,12 +16,11 @@ func (c *KafkaConsumer) Read() error {
 	fmt.Printf("consuming message from topic..")
 
 	msg, err := c.consumer.ReadMessage(-1)
-
-	if err == nil {
-		fmt.Printf("message on %s: %s\n", msg.TopicPartition, string(msg.Value))
-	} else {
+	if err != nil {
 		return fmt.Errorf("consumer error: %v (%v)", err, msg)
 	}
+
+	fmt.Printf("message on %s: %s\n", msg.TopicPartition, string(msg.Value))
 
 	return nil
 }
@@ -29,7 +28,6 @@ func (c *KafkaConsumer) Read() error {
 func (c *KafkaConsumer) Build() error {
 
 	nc, err := kafka.NewConsumer(c.consumerConfigMap())
-
 	if err != nil {
 		return err
 	}
@@ -37,7 +35,6 @@ func (c *KafkaConsumer) Build() error {
 	c.consumer = nc
 
 	err = c.consumer.Subscribe(c.Config.Topic, nil)
-
 	if err != nil {
 		return err
 	}
