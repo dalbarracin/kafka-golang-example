@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+
+    consumer:
+        container_name: kafka-consumer
+        build:
+            context: .
+            dockerfile: ./cmd/consumer/Dockerfile
+        networks:
+            - kafka-host
+
+    producer:
+        container_name: kafka-producer
+        build:
+            context: .
+            dockerfile: ./cmd/producer/Dockerfile
+        networks:
+            - kafka-host
+
+networks:
+    kafka-host:
+        name: kafka-host
