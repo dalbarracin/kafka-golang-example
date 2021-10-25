@@ -23,6 +23,5 @@ RUN go build -tags musl -ldflags "-w -s" -o kafka-consumer ./cmd/consumer
 FROM alpine:3.10
 
 COPY --from=build /app/kafka-consumer /
-COPY --from=build /app/cmd/config/config.json /
 
 CMD ["/kafka-consumer"]

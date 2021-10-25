@@ -1,6 +1,0 @@
-{
-    "BootstrapServers": "kafka:9091",
-    "AutoOffsetReset":  "earliest",
-    "GroupId":          "KAFKA_CONSUMER_GROUP",
-    "Topic":            "topic_1"
-}

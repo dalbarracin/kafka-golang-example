@@ -23,6 +23,5 @@ RUN go build -tags musl -ldflags "-w -s" -o kafka-producer ./cmd/producer
 FROM alpine:3.10
 
 COPY --from=build /app/kafka-producer /
-COPY --from=build /app/cmd/config/config.json /
 
 CMD ["/kafka-producer"]
