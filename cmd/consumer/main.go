@@ -1,19 +1,31 @@
 package main
 
 import (
-	"github.com/dalbarracin/kafka-golang-example/cmd/config"
+	"github.com/ardanlabs/conf/v2"
 	"github.com/dalbarracin/kafka-golang-example/internal/kafka"
 )
 
+type confg struct {
+	Kafka struct {
+		BootstrapServers string `conf:"default:kafka:9091"`
+		AutoOffsetReset  string `conf:"default:earliest"`
+		GroupId          string `conf:"default:KAFKA_CONSUMER_GROUP"`
+		Topic            string `conf:"default:topic_1"`
+	}
+}
+
 func main() {
 
-	consumer := &kafka.KafkaConsumer{
-		Config: &kafka.ConsumerConfig{},
+	consumerConfig, err := parseConfigValues()
+	if err != nil {
+		panic(err)
 	}
 
-	config.ReadConfigFromJson("config.json", consumer.Config)
+	consumer := &kafka.KafkaConsumer{}
 
-	err := consumer.Build()
+	consumer.SetConfig(consumerConfig)
+
+	err = consumer.Build()
 	if err != nil {
 		panic(err)
 	}
@@ -26,4 +38,21 @@ func main() {
 			panic(err)
 		}
 	}
+}
+
+func parseConfigValues() (*kafka.ConsumerConfig, error) {
+
+	var config confg
+
+	_, err := conf.Parse("", &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &kafka.ConsumerConfig{
+		BootstrapServers: config.Kafka.BootstrapServers,
+		AutoOffsetReset:  config.Kafka.AutoOffsetReset,
+		GroupId:          config.Kafka.GroupId,
+		Topic:            config.Kafka.Topic,
+	}, nil
 }

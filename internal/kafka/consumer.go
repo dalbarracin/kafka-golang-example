@@ -8,7 +8,11 @@ import (
 
 type KafkaConsumer struct {
 	consumer *kafka.Consumer
-	Config   *ConsumerConfig
+	config   *ConsumerConfig
+}
+
+func (c *KafkaConsumer) SetConfig(config *ConsumerConfig) {
+	c.config = config
 }
 
 func (c *KafkaConsumer) Read() error {
@@ -27,14 +31,21 @@ func (c *KafkaConsumer) Read() error {
 
 func (c *KafkaConsumer) Build() error {
 
-	nc, err := kafka.NewConsumer(c.consumerConfigMap())
+	err := c.config.Validate()
+	if err != nil {
+		return err
+	}
+
+	configMap := c.consumerConfigMap()
+
+	nc, err := kafka.NewConsumer(configMap)
 	if err != nil {
 		return err
 	}
 
 	c.consumer = nc
 
-	err = c.consumer.Subscribe(c.Config.Topic, nil)
+	err = c.consumer.Subscribe(c.config.Topic, nil)
 	if err != nil {
 		return err
 	}
@@ -45,11 +56,12 @@ func (c *KafkaConsumer) Build() error {
 func (c *KafkaConsumer) Close() {
 	c.consumer.Close()
 }
+
 func (c *KafkaConsumer) consumerConfigMap() *kafka.ConfigMap {
 
 	return &kafka.ConfigMap{
-		"bootstrap.servers": c.Config.BootstrapServers,
-		"auto.offset.reset": c.Config.AutoOffsetReset,
-		"group.id":          c.Config.GroupId,
+		"bootstrap.servers": c.config.BootstrapServers,
+		"auto.offset.reset": c.config.AutoOffsetReset,
+		"group.id":          c.config.GroupId,
 	}
 }
