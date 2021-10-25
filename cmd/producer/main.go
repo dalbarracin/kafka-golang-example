@@ -3,19 +3,29 @@ package main
 import (
 	"time"
 
-	"github.com/dalbarracin/kafka-golang-example/cmd/config"
+	"github.com/ardanlabs/conf/v2"
 	"github.com/dalbarracin/kafka-golang-example/internal/kafka"
 )
 
+type confg struct {
+	Kafka struct {
+		BootstrapServers string `conf:"default:kafka:9091"`
+		Topic            string `conf:"default:topic_1"`
+	}
+}
+
 func main() {
 
-	producer := &kafka.KafkaProducer{
-		Config: &kafka.ProducerConfig{},
+	producerConfig, err := parseConfigValues()
+	if err != nil {
+		panic(err)
 	}
 
-	config.ReadConfigFromJson("config.json", producer.Config)
+	producer := &kafka.KafkaProducer{}
 
-	err := producer.Build()
+	producer.SetConfig(producerConfig)
+
+	err = producer.Build()
 	if err != nil {
 		panic(err)
 	}
@@ -33,4 +43,19 @@ func main() {
 
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func parseConfigValues() (*kafka.ProducerConfig, error) {
+
+	var config confg
+
+	_, err := conf.Parse("", &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &kafka.ProducerConfig{
+		BootstrapServers: config.Kafka.BootstrapServers,
+		Topic:            config.Kafka.Topic,
+	}, nil
 }

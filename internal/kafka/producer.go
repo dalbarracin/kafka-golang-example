@@ -8,7 +8,11 @@ import (
 
 type KafkaProducer struct {
 	producer *kafka.Producer
-	Config   *ProducerConfig
+	config   *ProducerConfig
+}
+
+func (c *KafkaProducer) SetConfig(config *ProducerConfig) {
+	c.config = config
 }
 
 func (p *KafkaProducer) Write(word string) error {
@@ -17,7 +21,7 @@ func (p *KafkaProducer) Write(word string) error {
 	defer p.producer.Flush(15 * 1000)
 
 	p.producer.Produce(&kafka.Message{
-		TopicPartition: kafka.TopicPartition{Topic: &p.Config.Topic, Partition: kafka.PartitionAny},
+		TopicPartition: kafka.TopicPartition{Topic: &p.config.Topic, Partition: kafka.PartitionAny},
 		Value:          []byte(word),
 	}, nil)
 
@@ -35,7 +39,14 @@ func (p *KafkaProducer) Write(word string) error {
 
 func (p *KafkaProducer) Build() error {
 
-	np, err := kafka.NewProducer(p.producerConfigMap())
+	err := p.config.Validate()
+	if err != nil {
+		return err
+	}
+
+	configMap := p.producerConfigMap()
+
+	np, err := kafka.NewProducer(configMap)
 	if err != nil {
 		return err
 	}
@@ -52,6 +63,6 @@ func (c *KafkaProducer) Close() {
 func (p *KafkaProducer) producerConfigMap() *kafka.ConfigMap {
 
 	return &kafka.ConfigMap{
-		"bootstrap.servers": p.Config.BootstrapServers,
+		"bootstrap.servers": p.config.BootstrapServers,
 	}
 }
