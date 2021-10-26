@@ -15,18 +15,20 @@ func (c *KafkaConsumer) SetConfig(config *ConsumerConfig) {
 	c.config = config
 }
 
-func (c *KafkaConsumer) Read() error {
+func (c *KafkaConsumer) Read() (string, error) {
 
 	fmt.Printf("consuming message from topic..")
 
 	msg, err := c.consumer.ReadMessage(-1)
 	if err != nil {
-		return fmt.Errorf("consumer error: %v (%v)", err, msg)
+		return "", fmt.Errorf("consumer error: %v (%v)", err, msg)
 	}
 
-	fmt.Printf("message on %s: %s\n", msg.TopicPartition, string(msg.Value))
+	message := string(msg.Value)
 
-	return nil
+	fmt.Printf("message on %s: %s\n", msg.TopicPartition, message)
+
+	return message, nil
 }
 
 func (c *KafkaConsumer) Build() error {
