@@ -6,6 +6,7 @@ import (
 
 	"github.com/ardanlabs/conf/v2"
 	"github.com/dalbarracin/kafka-golang-example/internal/kafka"
+	"github.com/dalbarracin/kafka-golang-example/internal/persistence/invoice"
 )
 
 type confg struct {
@@ -26,24 +27,37 @@ func main() {
 
 func run() error {
 
-	consumerConfig, err := parseConfigValues()
+	cfg, err := parseConfigValues()
 	if err != nil {
 		return err
 	}
 
-	consumer := &kafka.KafkaConsumer{}
+	c := &kafka.KafkaConsumer{}
 
-	consumer.SetConfig(consumerConfig)
+	c.SetConfig(cfg)
 
-	err = consumer.Build()
+	err = c.Build()
 	if err != nil {
 		return err
 	}
 
-	defer consumer.Close()
+	defer c.Close()
+
+	r, err := invoice.NewRepository()
+	if err != nil {
+		return err
+	}
+
+	defer r.Close()
 
 	for {
-		err = consumer.Read()
+
+		msg, err := c.Read()
+		if err != nil {
+			return err
+		}
+
+		err = r.Insert(msg)
 		if err != nil {
 			return err
 		}
@@ -52,17 +66,17 @@ func run() error {
 
 func parseConfigValues() (*kafka.ConsumerConfig, error) {
 
-	var config confg
+	var cfg confg
 
-	_, err := conf.Parse("", &config)
+	_, err := conf.Parse("", &cfg)
 	if err != nil {
 		return nil, err
 	}
 
 	return &kafka.ConsumerConfig{
-		BootstrapServers: config.Kafka.BootstrapServers,
-		AutoOffsetReset:  config.Kafka.AutoOffsetReset,
-		GroupId:          config.Kafka.GroupId,
-		Topic:            config.Kafka.Topic,
+		BootstrapServers: cfg.Kafka.BootstrapServers,
+		AutoOffsetReset:  cfg.Kafka.AutoOffsetReset,
+		GroupId:          cfg.Kafka.GroupId,
+		Topic:            cfg.Kafka.Topic,
 	}, nil
 }
