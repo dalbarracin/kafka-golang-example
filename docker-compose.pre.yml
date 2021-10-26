@@ -27,6 +27,19 @@ services:
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
 
+    postgres:
+        container_name: postgres
+        build:
+            context: .
+            dockerfile: ./postgres/Dockerfile
+        environment:
+            POSTGRES_PASSWORD: postgrespass
+            POSTGRES_DB: kafka_messages
+        ports:
+            - "5432:5432"
+        networks:
+            - kafka-host
+            
 networks:
     kafka-host:
         name: kafka-host
