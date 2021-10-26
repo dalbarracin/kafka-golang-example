@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/ardanlabs/conf/v2"
@@ -15,10 +17,17 @@ type confg struct {
 }
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 
 	producerConfig, err := parseConfigValues()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	producer := &kafka.KafkaProducer{}
@@ -27,7 +36,7 @@ func main() {
 
 	err = producer.Build()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer producer.Close()
@@ -38,7 +47,7 @@ func main() {
 
 		err = producer.Write(word)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		time.Sleep(5 * time.Second)

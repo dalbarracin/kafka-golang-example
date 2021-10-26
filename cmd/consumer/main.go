@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/ardanlabs/conf/v2"
 	"github.com/dalbarracin/kafka-golang-example/internal/kafka"
 )
@@ -15,10 +18,17 @@ type confg struct {
 }
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 
 	consumerConfig, err := parseConfigValues()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	consumer := &kafka.KafkaConsumer{}
@@ -27,7 +37,7 @@ func main() {
 
 	err = consumer.Build()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	defer consumer.Close()
@@ -35,7 +45,7 @@ func main() {
 	for {
 		err = consumer.Read()
 		if err != nil {
-			panic(err)
+			return err
 		}
 	}
 }
